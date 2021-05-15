@@ -2,16 +2,10 @@ import sys
 import csv
 from collections import deque
 
-def isNum(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
-
 count=0
+#queue to handle the rolling 14 day percent chnages in RSI calculation
 changeLog=deque()
-print("orginal"+str(changeLog))
+#opening files
 with open('EUR_USD_D_DATA.csv', 'r') as readFrom:
     reader=csv.reader(readFrom.readlines())
 with open("EUR_USD_D_DATAwRSI.csv", 'w', newline='') as writeTo:
@@ -19,8 +13,8 @@ with open("EUR_USD_D_DATAwRSI.csv", 'w', newline='') as writeTo:
     for line in reader:
         if count<14:
             writer.writerow(line)
-            print("BAD WRITE")
         else:
+            #RSI maths
             positiveCount=0.0
             negativeCount=0.0
             positiveSum=0.0
@@ -29,7 +23,6 @@ with open("EUR_USD_D_DATAwRSI.csv", 'w', newline='') as writeTo:
                 if float(change)>0:
                     positiveCount+=1.0
                     positiveSum+=float(change)
-                    print(str(change)+" has been added new sum is"+str(positiveSum))
                 else:
                     negativeCount+=1.0
                     negativeSum+=float(change)
@@ -39,22 +32,22 @@ with open("EUR_USD_D_DATAwRSI.csv", 'w', newline='') as writeTo:
                     negativeCount=1.0
             positiveAvg=positiveSum/positiveCount
             negativeAvg=negativeSum/negativeCount
-            print(positiveAvg)
-            print(negativeAvg)
             if float(line[7])>0:
                 if negativeAvg!=0:
                     rsi=100-(100/(1+((positiveAvg*13)+float(line[7]))/((negativeAvg*(-13)))))
                 else:
+                    #edge cases for 14 up days
                     rsi=100
             else:
                 if negativeAvg!=0:
                     rsi=100-(100/(1+((positiveAvg*13)+float(line[7]))/((negativeAvg*(-13)))))
                 else:
+                    #or 14 down days
                     rsi=0
             line[18]=rsi
+            #line writing, queue popping first line skiping part of the code
             changeLog.popleft()
             writer.writerow(line)
         if count!=0:
             changeLog.append(line[7])
-        print(changeLog)
         count+=1

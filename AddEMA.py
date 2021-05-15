@@ -1,6 +1,7 @@
 import sys
 import csv
 
+#little function to help with not adding the #N/A values in my maths
 def isNum(s):
     try:
         float(s)
@@ -9,11 +10,14 @@ def isNum(s):
         return False
 
 count=0
+#open my files
 with open('CSVs/EUR_USD_D.csv', 'r') as readFrom:
     reader=csv.reader(readFrom.readlines())
 with open("EUR_USD_D_DATA.csv", 'w', newline='') as writeTo:
     writer=csv.writer(writeTo)
     for line in reader:
+        #first few vaules cant have an EMA since we need more data points
+        #along with EMA calculation
         if count<12:
             writer.writerow(line)
         elif count<26:
