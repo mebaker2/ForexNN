@@ -4,6 +4,7 @@ import numpy as np
 import random
 import plotly.graph_objects as go
 import plotly.express as px
+from plotly.subplots import make_subplots
 
 #varrible creation
 xValues=[]
@@ -49,27 +50,60 @@ for y in yValues:
 #reformat data to numpy arrays for curve fit
 np.reshape(xValues,newshape=(len(xValues)))
 np.reshape(scalledY,newshape=(len(scalledY)))
-polyCount=15
-curve_fit = np.polyfit(xValues, scalledY, polyCount)
-#plot orginal data
-chart=go.Figure(data=[go.Candlestick(x=xTime,open=open,high=high,low=low,close=close)])
-chart.show()
-#plot scalled values
-fig=px.scatter(x=xValues,y=scalledY)
-fig.show()
+polyCountMaster=15
+curve_fit = np.polyfit(xValues, scalledY, polyCountMaster)
+curve_fit2 = np.polyfit(xValues, scalledY, 8)
+curve_fit3 = np.polyfit(xValues, scalledY, 5)
 #was an atempt to trim unessacry high order polynomials when i was testing fits, probably needs to be deleted as isnt normaly used
+allPlot = make_subplots(rows=2,cols=3,subplot_titles=("Candle","SMA5 Closing","Poly15","","Poly8","Poly5"))
+allPlot.add_trace(go.Candlestick(x=xTime,open=open,high=high,low=low,close=close),row=1,col=1)
+allPlot.add_trace(go.Scatter(x=xValues,y=scalledY),row=1,col=2)
+
 polynomials=[]
+polyCount=15
 for x in curve_fit:
     if abs(x)<=.00001:
         print("deleted order:"+str(polyCount))
     else:
         polynomials.append([polyCount,x])
     polyCount-=1
-#new Graph with my generated eq
 regressionY=[]
 for x in range(100):
     regressionY.append(float(0))
     for scale in polynomials:
         regressionY[x]+=scale[1]*(x/1000.0)**scale[0]
-reg=px.scatter(x=xValues,y=regressionY)
-reg.show()
+allPlot.add_trace(go.Scatter(x=xValues,y=regressionY),row=1,col=3)
+
+
+polynomials=[]
+polyCount=8
+for x in curve_fit2:
+    if abs(x)<=.00001:
+        print("deleted order:"+str(polyCount))
+    else:
+        polynomials.append([polyCount,x])
+    polyCount-=1
+regressionY=[]
+for x in range(100):
+    regressionY.append(float(0))
+    for scale in polynomials:
+        regressionY[x]+=scale[1]*(x/1000.0)**scale[0]
+allPlot.add_trace(go.Scatter(x=xValues,y=regressionY),row=2,col=2)
+
+polynomials=[]
+polyCount=5
+for x in curve_fit3:
+    if abs(x)<=.00001:
+        print("deleted order:"+str(polyCount))
+    else:
+        polynomials.append([polyCount,x])
+    polyCount-=1
+regressionY=[]
+for x in range(100):
+    regressionY.append(float(0))
+    for scale in polynomials:
+        regressionY[x]+=scale[1]*(x/1000.0)**scale[0]
+allPlot.add_trace(go.Scatter(x=xValues,y=regressionY),row=2,col=3)
+#new Graph with my generated eq
+allPlot.update_layout(height=1000, width=1500,title_text="all plots")
+allPlot.show()
