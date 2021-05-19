@@ -27,38 +27,30 @@ def getRsquared(FileToReadFrom,polyOrder):
         yValues=[]
         maxVal=-1.0
         minVal=2.0
-        startNum=random.randrange(6,1000000)
-        endNum=startNum+100
-        count=0
         subCount=float(0)
-        for row in reader:
-            if count>startNum and count<=endNum:
-                xValues.append(subCount)
-                yValues.append(float(row[8]))
-                if maxVal<float(row[8]):
-                    maxVal=float(row[8])
-                if minVal>float(row[8]):
-                    minVal=float(row[8])
-                subCount+=.001
-            count+=1
-            if count>endNum+1:
-                break
-    valueRange=maxVal-minVal
-    scalledY=[]
-    for y in yValues:
-        scalledY.append(-1+(((y-minVal)*2)/(valueRange)))
-    np.reshape(xValues,newshape=(len(xValues)))
-    np.reshape(scalledY,newshape=(len(scalledY)))
-    curve_fit = np.polyfit(xValues, scalledY, polyOrder)
-
-    polynomials=[]
-    polyCount=polyOrder
-    for x in curve_fit:
-        polynomials.append([polyCount,x])
-        polyCount-=1
-    regressionY=[]
-    for x in range(100):
-        regressionY.append(float(0))
-        for scale in polynomials:
-            regressionY[x]+=scale[1]*(x/1000.0)**scale[0]
+        for line in reader:
+            xValues.append(subCount)
+            yValues.append(float(line[8]))
+            if maxVal<float(line[8]):
+                maxVal=float(line[8])
+            if minVal>float(line[8]):
+                minVal=float(line[8])
+            subCount+=.001
+        valueRange=maxVal-minVal
+        scalledY=[]
+        for y in yValues:
+            scalledY.append(-1+(((y-minVal)*2)/(valueRange)))
+        np.reshape(xValues,newshape=(len(xValues)))
+        np.reshape(scalledY,newshape=(len(scalledY)))
+        curve_fit = np.polyfit(xValues, scalledY, polyOrder)
+        polynomials=[]
+        polyCount=polyOrder
+        for x in curve_fit:
+            polynomials.append([polyCount,x])
+            polyCount-=1
+        regressionY=[]
+        for x in range(100):
+            regressionY.append(float(0))
+            for scale in polynomials:
+                regressionY[x]+=scale[1]*(x/1000.0)**scale[0]
     return Rsquared(scalledY,regressionY)
